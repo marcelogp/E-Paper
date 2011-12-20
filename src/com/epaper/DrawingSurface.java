@@ -95,6 +95,10 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     public boolean hasMoreRedo() {
         return commandManager.hasMoreRedo();
     }
+    
+    public boolean hasMoreUndo() {
+        return commandManager.hasMoreUndo();
+    }
 
     public void redo() {
         if (commandManager.hasMoreRedo()) {
@@ -109,10 +113,6 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
             commandManager.undo();
         }
         isDrawing = true;
-    }
-
-    public boolean hasMoreUndo() {
-        return commandManager.hasMoreUndo();
     }
 
     public Bitmap getBitmap() {

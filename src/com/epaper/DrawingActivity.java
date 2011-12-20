@@ -25,16 +25,14 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
 {
     private DrawingSurface drawingSurface;
     private Paint currentPaint;
+    private Brush currentBrush;
     private Button redoBtn;
     private Button undoBtn;
-    private Brush currentBrush;
     private File APP_FILE_PATH = new File("/sdcard/AndroidDrawings");
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawing_activity);
-
-        setTheme(android.R.style.Theme_NoTitleBar_Fullscreen);
 
         setCurrentPaint();
         currentBrush = new PenBrush();
