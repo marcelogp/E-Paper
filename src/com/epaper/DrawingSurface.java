@@ -2,17 +2,9 @@ package com.epaper;
 
 import android.content.Context;
 import android.graphics.*;
-import android.os.Handler;
-import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -78,7 +70,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
                         }
 
                         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-                        
+
                         if (currentDrawingPath != null)
                             currentDrawingPath.draw(canvas);
                         else

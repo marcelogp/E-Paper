@@ -2,8 +2,6 @@ package com.epaper;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.os.Handler;
-import android.util.Log;
 
 import java.util.Iterator;
 import java.util.List;
@@ -37,7 +35,7 @@ public class CommandManager
 
     public DrawingPath redo() {
         final int length = redoStack.toArray().length;
-        
+
         if (length > 0) {
             final DrawingPath redoCommand = redoStack.get(length - 1);
             redoStack.remove(length - 1);
