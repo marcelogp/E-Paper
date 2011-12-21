@@ -28,17 +28,20 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
     private Brush currentBrush;
     private Button redoBtn;
     private Button undoBtn;
+    private Boolean toolEraser;
     private File APP_FILE_PATH = new File("/sdcard/AndroidDrawings");
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawing_activity);
 
-        setCurrentPaint();
+        setCurrentPaint(3);
         currentBrush = new PenBrush();
 
         drawingSurface = (DrawingSurface) findViewById(R.id.drawingSurface);
         drawingSurface.setOnTouchListener(this);
+        
+        toolEraser = false;
 
         redoBtn = (Button) findViewById(R.id.redoBtn);
         undoBtn = (Button) findViewById(R.id.undoBtn);
@@ -47,18 +50,26 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
         undoBtn.setEnabled(false);
     }
 
-    private void setCurrentPaint() {
+    private void setCurrentPaint(int size) {
         currentPaint = new Paint();
         currentPaint.setDither(true);
         currentPaint.setColor(0xFF000000);
         currentPaint.setStyle(Paint.Style.STROKE);
         currentPaint.setStrokeJoin(Paint.Join.ROUND);
         currentPaint.setStrokeCap(Paint.Cap.ROUND);
-        currentPaint.setStrokeWidth(3);
+        currentPaint.setStrokeWidth(size);
     }
 
     public boolean onTouch(View view, MotionEvent motionEvent) {
         DrawingPath drawingPath = drawingSurface.getDrawingPath();
+        
+        if (toolEraser) {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN ||
+                motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+                drawingSurface.attemptErase(motionEvent.getX(), motionEvent.getY());
+            }
+            return true;
+        }
 
         if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
             drawingSurface.start();
@@ -127,13 +138,17 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
                 new ExportBitmapToFile(this, saveHandler, drawingSurface.getBitmap()).execute();
                 break;
             case R.id.smallBtn:
-                currentPaint.setStrokeWidth(3);
+                setCurrentPaint(3);
                 break;
             case R.id.medBtn:
-                currentPaint.setStrokeWidth(6);
+                setCurrentPaint(6);
                 break;
             case R.id.largeBtn:
-                currentPaint.setStrokeWidth(9);
+                setCurrentPaint(9);
+                break;
+            case R.id.eraserBtn:
+                toolEraser = !toolEraser;
+                findViewById(R.id.eraserBtn).setSelected(toolEraser);
                 break;
             case R.id.clearBtn:
                 drawingSurface.resetHistory();

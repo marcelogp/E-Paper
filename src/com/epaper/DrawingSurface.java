@@ -1,10 +1,13 @@
 package com.epaper;
 
+import com.epaper.command.CommandManager;
 import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import com.epaper.command.Command;
+import com.epaper.command.DrawCommand;
 
 public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -28,11 +31,11 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         commandManager = new CommandManager();
         thread = new DrawThread(getHolder());
         cacheIsDirty = true;
-        resetBitmapCache(1, 1);
+        bitmapCache = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
     }
 
-    private void resetBitmapCache(int w, int h) {
-        bitmapCache = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+    private void resetBitmapCache() {
+        bitmapCache = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
     }
 
     public void resetHistory() {
@@ -40,12 +43,20 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         cacheIsDirty = true;
         isDrawing = true;
     }
-
-    private void addPath(DrawingPath path) {
-        Canvas c = new Canvas(bitmapCache);
-        path.draw(c);
+    
+    void attemptErase(float centerX, float centerY) {
+        if (cacheIsDirty) {
+            System.err.println("ERR: Should not be dirty");
+            return;
+        }
+        
+        if (commandManager.haveAnyBlack(centerX, centerY, bitmapCache)) {
+            resetBitmapCache();
+            commandManager.performErase(bitmapCache, centerX, centerY);
+            isDrawing = true;
+        }
     }
-
+    
     class DrawThread extends Thread
     {
         private SurfaceHolder mSurfaceHolder;
@@ -77,7 +88,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
                             isDrawing = false;
 
                         if (cacheIsDirty) {
-                            resetBitmapCache(getWidth(), getHeight());
+                            resetBitmapCache();
                             commandManager.drawAll(bitmapCache);
                             cacheIsDirty = false;
                         }
@@ -99,20 +110,22 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     public boolean hasMoreUndo() {
         return commandManager.hasMoreUndo();
     }
-
-    public void redo() {
-        if (commandManager.hasMoreRedo()) {
-            addPath(commandManager.redo());
-        }
+    
+    private void addToCache(Command cmd) {
+        if (cmd == null) return;
+        if (!cmd.applyToBitmap(bitmapCache))
+            cacheIsDirty = true;
         isDrawing = true;
     }
 
+    public void redo() {
+        if (commandManager.hasMoreRedo())
+            addToCache(commandManager.redo());
+    }
+
     public void undo() {
-        if (commandManager.hasMoreUndo()) {
-            cacheIsDirty = true;
-            commandManager.undo();
-        }
-        isDrawing = true;
+        if (commandManager.hasMoreUndo())
+            addToCache(commandManager.undo());
     }
 
     public Bitmap getBitmap() {
@@ -127,8 +140,9 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     public void end() {
-        commandManager.addCommand(currentDrawingPath);
-        addPath(currentDrawingPath);
+        Command cmd = new DrawCommand(currentDrawingPath);
+        commandManager.addCommand(cmd);
+        addToCache(cmd);
         currentDrawingPath = null;
     }
 

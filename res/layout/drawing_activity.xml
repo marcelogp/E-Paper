@@ -60,6 +60,13 @@
         <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
+                android:text="E"
+                android:onClick="onClick"
+                android:id="@+id/eraserBtn"
+        />
+        <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
                 android:text="Clear"
                 android:onClick="onClick"
                 android:id="@+id/clearBtn"
