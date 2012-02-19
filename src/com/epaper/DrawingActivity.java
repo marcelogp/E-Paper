@@ -183,7 +183,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            //mHandler.post(completeRunnable);
             return false;
         }
 

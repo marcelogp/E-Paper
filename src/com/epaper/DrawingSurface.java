@@ -145,16 +145,18 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         addToCache(cmd);
         currentDrawingPath = null;
     }
-
+    
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         // TODO Auto-generated method stub
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        isDrawing=true;
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
-        // TODO Auto-generated method stub
+        thread = new DrawThread(holder);
         thread.setRunning(true);
         thread.start();
+        isDrawing=true;
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {
