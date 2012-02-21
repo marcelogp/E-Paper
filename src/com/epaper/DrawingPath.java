@@ -12,4 +12,8 @@ public class DrawingPath
     public void draw(Canvas canvas) {
         canvas.drawPath(path, paint);
     }
+
+    public Path getPath() {
+        return path;
+    }
 }

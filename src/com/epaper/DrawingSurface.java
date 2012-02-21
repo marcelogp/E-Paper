@@ -1,12 +1,12 @@
 package com.epaper;
 
-import com.epaper.command.CommandManager;
 import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import com.epaper.command.Command;
+import com.epaper.command.CommandManager;
 import com.epaper.command.DrawCommand;
 
 public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callback
@@ -44,15 +44,17 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         isDrawing = true;
     }
     
-    void attemptErase(float centerX, float centerY) {
+    void attemptErase(float x, float y) {
         if (cacheIsDirty) {
             System.err.println("ERR: Should not be dirty");
             return;
         }
         
-        if (commandManager.haveAnyBlack(centerX, centerY, bitmapCache)) {
+        if (commandManager.performErase(bitmapCache.getHeight(), 
+                                        bitmapCache.getWidth(),
+                                        Math.round(x), Math.round(y))) {
             resetBitmapCache();
-            commandManager.performErase(bitmapCache, centerX, centerY);
+            commandManager.drawAll(bitmapCache);
             isDrawing = true;
         }
     }

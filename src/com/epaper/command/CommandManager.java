@@ -2,16 +2,14 @@ package com.epaper.command;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import com.epaper.DrawingPath;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Collections;
-import java.util.ArrayList;
+import java.util.*;
 
 public class CommandManager
 {
-    private static int PROX_SIDE = 4;
+    private static float STROKE_DIST = 8.0f;
     private List<DrawingPath> currentStack;
     private List<Command> redoStack;
     private List<Command> undoStack;
@@ -30,13 +28,14 @@ public class CommandManager
 
     public Command undo() {
         final int undoLength = undoStack.size();
-        
-        if (undoLength <= 0) return null;
-        
+
+        if (undoLength <= 0)
+            return null;
+
         Command undoCommand = undoStack.get(undoLength - 1);
         undoStack.remove(undoLength - 1);
         redoStack.add(undoCommand);
-        
+
         undoCommand = undoCommand.invert();
         undoCommand.apply(currentStack);
         return undoCommand;
@@ -45,13 +44,14 @@ public class CommandManager
     public Command redo() {
         final int redoLength = redoStack.toArray().length;
 
-        if (redoLength <= 0) return null;
-        
+        if (redoLength <= 0)
+            return null;
+
         Command redoCommand = redoStack.get(redoLength - 1);
         redoStack.remove(redoLength - 1);
         redoCommand.apply(currentStack);
         undoStack.add(redoCommand);
-        
+
         return redoCommand;
     }
 
@@ -81,39 +81,40 @@ public class CommandManager
         return undoStack.toArray().length > 0;
     }
 
-    public void performErase(Bitmap drawTo, float centerX, float centerY) {
-        Bitmap bitmapTmp = drawTo.copy(Bitmap.Config.ARGB_8888, true);
-        Canvas c = new Canvas(drawTo);
+    public boolean performErase(int h, int w, int x, int y) {
+        Bitmap bitmapTmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         Canvas ctmp = new Canvas(bitmapTmp);
-
+        
+        bitmapTmp.eraseColor(0xFFFFFFFF);
+        
         if (currentStack != null) {
             synchronized (currentStack) {
-                for (int i=0; i<currentStackLength(); i++) {
+                for (int i = 0; i < currentStackLength(); i++) {
                     final DrawingPath drawingPath = currentStack.get(i);
-                    drawingPath.draw(ctmp);
-                    
-                    if (haveAnyBlack(centerX, centerY, bitmapTmp)) {
-                        /* Rollback last draw and erase path from stack */
-                        bitmapTmp = drawTo.copy(Bitmap.Config.ARGB_8888, true);
-                        addCommand(new EraseCommand(drawingPath));
-                        i--;
-                    }
-                    else drawingPath.draw(c);
+
+                    /* Draw each path thicker and with an id color to
+                       later check for erase action at x,y */
+                    Paint iPaint = new Paint(drawingPath.paint);
+                    iPaint.setColor(0xFF000000 | i);
+                    iPaint.setStrokeWidth(iPaint.getStrokeWidth() + STROKE_DIST);
+                    ctmp.drawPath(drawingPath.getPath(), iPaint);
                 }
+
+                return removePath(x, y, bitmapTmp);
             }
         }
+        return false;
     }
-    
-    public boolean haveAnyBlack(float centerX, float centerY, Bitmap bitmap) {
-        int x0 = (int)(centerX-PROX_SIDE/2.0f);
-        int y0 = (int)(centerY-PROX_SIDE/2.0f);
+
+    public boolean removePath(int x, int y, Bitmap bitmap) {
+        int pxy = bitmap.getPixel(x, y);
         
-        if (x0 < 0 || y0 < 0) return false;
-        int prPixels[] = new int[PROX_SIDE*PROX_SIDE];
-        bitmap.getPixels(prPixels, 0, PROX_SIDE, x0, y0, PROX_SIDE, PROX_SIDE);
-        
-        for (int i=0; i<PROX_SIDE*PROX_SIDE; i++)
-            if (prPixels[i] != 0) return true;
+        if (pxy != -1) { /* Non-white -> there is a Path here */
+            int idx = pxy ^ 0xFF000000;
+            final DrawingPath drawingPath = currentStack.get(idx);
+            addCommand(new EraseCommand(drawingPath));
+            return true;
+        }
         return false;
     }
 }
