@@ -117,4 +117,8 @@ public class CommandManager
         }
         return false;
     }
+    
+    public boolean isEmpty() {
+        return currentStack.isEmpty();
+    }
 }

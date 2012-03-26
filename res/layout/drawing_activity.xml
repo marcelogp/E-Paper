@@ -18,58 +18,82 @@
         <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="Undo"
+                android:background="@drawable/file"
                 android:onClick="onClick"
-                android:id="@+id/undoBtn"
+                android:id="@+id/loadBtn"
+                android:layout_marginLeft="5dip"
+                android:layout_marginRight="5dip"
         />
         <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="Redo"
-                android:onClick="onClick"
-                android:id="@+id/redoBtn"
-        />
-        <Button
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="Save"
+                android:background="@drawable/save"
                 android:onClick="onClick"
                 android:id="@+id/saveBtn"
+                android:layout_marginRight="5dip"
         />
         <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="S"
+                android:background="@drawable/trash"
+                android:onClick="onClick"
+                android:id="@+id/clearBtn"
+                android:layout_marginRight="35dip"
+        />
+        <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:background="@drawable/undo"
+                android:onClick="onClick"
+                android:id="@+id/undoBtn"
+                android:layout_marginRight="5dip"
+        />
+        <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:background="@drawable/redo"
+                android:onClick="onClick"
+                android:id="@+id/redoBtn"
+                android:layout_marginRight="5dip"
+        />
+        <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:background="@drawable/left"
+                android:onClick="onClick"
+                android:id="@+id/prevBtn"
+                android:layout_marginRight="5dip"
+        />
+        <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:background="@drawable/right"
+                android:onClick="onClick"
+                android:id="@+id/nextBtn"
+                android:layout_marginRight="30dip"
+        />
+        <Button
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:background="@drawable/small"
                 android:onClick="onClick"
                 android:id="@+id/smallBtn"
         />
         <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="M"
-                android:onClick="onClick"
-                android:id="@+id/medBtn"
-        />
-        <Button
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="L"
+                android:background="@drawable/large"
                 android:onClick="onClick"
                 android:id="@+id/largeBtn"
+                android:layout_marginRight="5dip"
         />
         <Button
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="E"
+                android:background="@drawable/erase"
                 android:onClick="onClick"
                 android:id="@+id/eraserBtn"
-        />
-        <Button
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="Clear"
-                android:onClick="onClick"
-                android:id="@+id/clearBtn"
+                android:layout_marginRight="5dip"
         />
     </LinearLayout>
 </RelativeLayout>

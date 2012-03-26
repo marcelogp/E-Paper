@@ -8,6 +8,7 @@ import android.view.SurfaceView;
 import com.epaper.command.Command;
 import com.epaper.command.CommandManager;
 import com.epaper.command.DrawCommand;
+import java.util.ArrayList;
 
 public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -16,9 +17,10 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     private Bitmap mBitmap;
     private boolean isDrawing = true;
     private DrawingPath currentDrawingPath;
-    private CommandManager commandManager;
+    private ArrayList<CommandManager> commandManagerL;
     private Bitmap bitmapCache;
     private Boolean cacheIsDirty;
+    private int curCM;
 
     public DrawingSurface(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -28,9 +30,11 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         getHolder().setFormat(PixelFormat.TRANSPARENT);
         setBackgroundColor(Color.WHITE);
 
-        commandManager = new CommandManager();
+        commandManagerL = new ArrayList<CommandManager>();
+        curCM = -1;
+        switchNextPage();
+
         thread = new DrawThread(getHolder());
-        cacheIsDirty = true;
         bitmapCache = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
     }
 
@@ -39,26 +43,54 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     public void resetHistory() {
-        commandManager = new CommandManager();
+        N2EpdController.setMode(N2EpdController.REGION_APP_3,
+                                N2EpdController.WAVE_GC,
+                                N2EpdController.MODE_ACTIVE);
+        commandManagerL.set(curCM, new CommandManager());
         cacheIsDirty = true;
         isDrawing = true;
     }
-    
+
     void attemptErase(float x, float y) {
         if (cacheIsDirty) {
             System.err.println("ERR: Should not be dirty");
             return;
         }
-        
-        if (commandManager.performErase(bitmapCache.getHeight(), 
-                                        bitmapCache.getWidth(),
-                                        Math.round(x), Math.round(y))) {
+
+        if (commandManagerL.get(curCM).performErase(bitmapCache.getHeight(),
+                                                    bitmapCache.getWidth(),
+                                                    Math.round(x), Math.round(y))) {
             resetBitmapCache();
-            commandManager.drawAll(bitmapCache);
+            commandManagerL.get(curCM).drawAll(bitmapCache);
             isDrawing = true;
         }
     }
-    
+
+    public final void switchNextPage() {
+        if (curCM == commandManagerL.size() - 1) {
+            /*
+             * Current page is already blank? Do nothing.
+             */
+            if (curCM >= 0 && commandManagerL.get(curCM).isEmpty())
+                return;
+
+            commandManagerL.add(new CommandManager());
+        }
+        curCM++;
+
+        cacheIsDirty = true;
+        isDrawing = true;
+    }
+
+    public final void switchPrevPage() {
+        if (curCM <= 0)
+            return;
+        curCM--;
+
+        cacheIsDirty = true;
+        isDrawing = true;
+    }
+
     class DrawThread extends Thread
     {
         private SurfaceHolder mSurfaceHolder;
@@ -91,7 +123,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
 
                         if (cacheIsDirty) {
                             resetBitmapCache();
-                            commandManager.drawAll(bitmapCache);
+                            commandManagerL.get(curCM).drawAll(bitmapCache);
                             cacheIsDirty = false;
                         }
                         canvas.drawBitmap(bitmapCache, 0, 0, null);
@@ -106,28 +138,29 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     public boolean hasMoreRedo() {
-        return commandManager.hasMoreRedo();
+        return commandManagerL.get(curCM).hasMoreRedo();
     }
-    
+
     public boolean hasMoreUndo() {
-        return commandManager.hasMoreUndo();
+        return commandManagerL.get(curCM).hasMoreUndo();
     }
-    
+
     private void addToCache(Command cmd) {
-        if (cmd == null) return;
+        if (cmd == null)
+            return;
         if (!cmd.applyToBitmap(bitmapCache))
             cacheIsDirty = true;
         isDrawing = true;
     }
 
     public void redo() {
-        if (commandManager.hasMoreRedo())
-            addToCache(commandManager.redo());
+        if (commandManagerL.get(curCM).hasMoreRedo())
+            addToCache(commandManagerL.get(curCM).redo());
     }
 
     public void undo() {
-        if (commandManager.hasMoreUndo())
-            addToCache(commandManager.undo());
+        if (commandManagerL.get(curCM).hasMoreUndo())
+            addToCache(commandManagerL.get(curCM).undo());
     }
 
     public Bitmap getBitmap() {
@@ -143,22 +176,22 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
 
     public void end() {
         Command cmd = new DrawCommand(currentDrawingPath);
-        commandManager.addCommand(cmd);
+        commandManagerL.get(curCM).addCommand(cmd);
         addToCache(cmd);
         currentDrawingPath = null;
     }
-    
+
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         // TODO Auto-generated method stub
         mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        isDrawing=true;
+        isDrawing = true;
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
         thread = new DrawThread(holder);
         thread.setRunning(true);
         thread.start();
-        isDrawing=true;
+        isDrawing = true;
     }
 
     public void surfaceDestroyed(SurfaceHolder holder) {

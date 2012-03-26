@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -21,7 +22,7 @@ import com.epaper.brush.PenBrush;
 import java.io.File;
 import java.io.FileOutputStream;
 
-public class DrawingActivity extends Activity implements View.OnTouchListener
+public class DrawingActivity extends Activity implements View.OnTouchListener, View.OnKeyListener
 {
     private DrawingSurface drawingSurface;
     private Paint currentPaint;
@@ -40,7 +41,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
 
         drawingSurface = (DrawingSurface) findViewById(R.id.drawingSurface);
         drawingSurface.setOnTouchListener(this);
-        
+        drawingSurface.setOnKeyListener(this);
+
         toolEraser = false;
 
         redoBtn = (Button) findViewById(R.id.redoBtn);
@@ -62,10 +64,10 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
 
     public boolean onTouch(View view, MotionEvent motionEvent) {
         DrawingPath drawingPath = drawingSurface.getDrawingPath();
-        
+
         if (toolEraser) {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN ||
-                motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN
+                || motionEvent.getAction() == MotionEvent.ACTION_MOVE) {
                 drawingSurface.attemptErase(motionEvent.getX(), motionEvent.getY());
             }
             return true;
@@ -103,19 +105,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
         switch (view.getId()) {
             case R.id.undoBtn:
                 drawingSurface.undo();
-                if (drawingSurface.hasMoreUndo() == false) {
-                    undoBtn.setEnabled(false);
-                }
-                redoBtn.setEnabled(true);
                 break;
-
             case R.id.redoBtn:
                 drawingSurface.redo();
-                if (drawingSurface.hasMoreRedo() == false) {
-                    redoBtn.setEnabled(false);
-                }
-
-                undoBtn.setEnabled(true);
                 break;
             case R.id.saveBtn:
                 final Activity currentActivity = this;
@@ -125,7 +117,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
                     public void handleMessage(Message msg) {
                         final AlertDialog alertDialog = new AlertDialog.Builder(currentActivity).create();
                         alertDialog.setTitle("Saved");
-                        alertDialog.setMessage("Your drawing had been saved :)");
+                        alertDialog.setMessage("Your drawing had been saved");
                         alertDialog.setButton("OK", new DialogInterface.OnClickListener()
                         {
                             public void onClick(DialogInterface dialog, int which) {
@@ -139,23 +131,50 @@ public class DrawingActivity extends Activity implements View.OnTouchListener
                 break;
             case R.id.smallBtn:
                 setCurrentPaint(3);
-                break;
-            case R.id.medBtn:
-                setCurrentPaint(6);
+                toolEraser = false;
                 break;
             case R.id.largeBtn:
-                setCurrentPaint(9);
+                setCurrentPaint(8);
+                toolEraser = false;
                 break;
             case R.id.eraserBtn:
                 toolEraser = !toolEraser;
-                findViewById(R.id.eraserBtn).setSelected(toolEraser);
                 break;
             case R.id.clearBtn:
                 drawingSurface.resetHistory();
                 break;
+            case R.id.prevBtn:
+                drawingSurface.switchPrevPage();
+                break;
+            case R.id.nextBtn:
+                drawingSurface.switchNextPage();
+                break;
         }
     }
 
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() != MotionEvent.ACTION_DOWN) 
+            return false;
+        
+        switch (keyCode) {
+            case 92:
+                drawingSurface.undo();
+                break;
+            case 93:
+                drawingSurface.redo();
+                break;
+            case 94:
+                drawingSurface.switchPrevPage();
+                break;
+            case 95:
+                drawingSurface.switchNextPage();
+                break;
+            default:
+                return false;
+        }
+        return true;
+    }
+    
     private class ExportBitmapToFile extends AsyncTask<Intent, Void, Boolean>
     {
         private Context mContext;
