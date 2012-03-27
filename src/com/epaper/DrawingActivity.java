@@ -27,8 +27,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
     private DrawingSurface drawingSurface;
     private Paint currentPaint;
     private Brush currentBrush;
-    private Button redoBtn;
-    private Button undoBtn;
     private Boolean toolEraser;
     private File APP_FILE_PATH = new File("/sdcard/AndroidDrawings");
 
@@ -45,11 +43,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
 
         toolEraser = false;
 
-        redoBtn = (Button) findViewById(R.id.redoBtn);
-        undoBtn = (Button) findViewById(R.id.undoBtn);
-
-        redoBtn.setEnabled(false);
-        undoBtn.setEnabled(false);
+        drawingSurface.start(); // ensures that first drawing will respond quickly
     }
 
     private void setCurrentPaint(int size) {
@@ -90,18 +84,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
             drawingSurface.end();
 
             currentBrush.mouseUp(drawingPath.path, motionEvent.getX(), motionEvent.getY());
-
-            undoBtn.setEnabled(true);
-            redoBtn.setEnabled(false);
         }
         return true;
     }
 
     public void onClick(View view) {
-        N2EpdController.setMode(N2EpdController.REGION_APP_3,
-                                N2EpdController.WAVE_GU,
-                                N2EpdController.MODE_ONESHOT_ALL);
-
         switch (view.getId()) {
             case R.id.undoBtn:
                 drawingSurface.undo();
