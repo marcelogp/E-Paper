@@ -15,7 +15,6 @@ import android.os.Message;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import com.epaper.brush.Brush;
 import com.epaper.brush.PenBrush;
 
@@ -90,12 +89,12 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
 
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.undoBtn:
-                drawingSurface.undo();
-                break;
-            case R.id.redoBtn:
-                drawingSurface.redo();
-                break;
+//            case R.id.undoBtn:
+//                drawingSurface.undo();
+//                break;
+//            case R.id.redoBtn:
+//                drawingSurface.redo();
+//                break;
             case R.id.saveBtn:
                 final Activity currentActivity = this;
                 Handler saveHandler = new Handler()
@@ -127,8 +126,11 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
             case R.id.eraserBtn:
                 toolEraser = !toolEraser;
                 break;
-            case R.id.clearBtn:
-                drawingSurface.resetHistory();
+            case R.id.remPageBtn:
+                drawingSurface.removePage();
+                break;
+            case R.id.newPageBtn:
+                drawingSurface.insertPage();
                 break;
             case R.id.prevBtn:
                 drawingSurface.switchPrevPage();
@@ -140,9 +142,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
     }
 
     public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if (event.getAction() != MotionEvent.ACTION_DOWN) 
+        if (event.getAction() != MotionEvent.ACTION_DOWN)
             return false;
-        
+
         switch (keyCode) {
             case 92:
                 drawingSurface.undo();
@@ -161,7 +163,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
         }
         return true;
     }
-    
+
     private class ExportBitmapToFile extends AsyncTask<Intent, Void, Boolean>
     {
         private Context mContext;

@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:background="@drawable/file"
             android:onClick="onClick"
-            android:id="@+id/loadBtn"
+            android:id="@+id/newBtn"
             android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
         />
@@ -35,26 +35,26 @@
         <Button
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:background="@drawable/trash"
+            android:background="@drawable/eject"
             android:onClick="onClick"
-            android:id="@+id/clearBtn"
+            android:id="@+id/loadBtn"
             android:layout_marginRight="35dip"
-        />
+        />        
         <Button
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:background="@drawable/undo"
+            android:background="@drawable/newpage"
             android:onClick="onClick"
-            android:id="@+id/undoBtn"
+            android:id="@+id/newPageBtn"
             android:layout_marginRight="5dip"
         />
         <Button
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:background="@drawable/redo"
+            android:background="@drawable/rempage"
             android:onClick="onClick"
-            android:id="@+id/redoBtn"
-            android:layout_marginRight="5dip"
+            android:id="@+id/remPageBtn"
+            android:layout_marginRight="10dip"
         />
         <Button
             android:layout_height="wrap_content"

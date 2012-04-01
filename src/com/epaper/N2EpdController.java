@@ -72,7 +72,7 @@ public class N2EpdController
             try {
                 Object regionParams = RegionParamsConstructor.newInstance(new Object[]{0, 0, 600, 800, enumsWave[wave]});
 //				mtSetRegion.invoke(null, "CoolReader", enumsRegion[region], view, enumsWave[wave], enumsMode[mode]);
-                mtSetRegion.invoke(null, "CoolReader", enumsRegion[region], regionParams, enumsMode[mode]);
+                mtSetRegion.invoke(null, "E-Paper", enumsRegion[region], regionParams, enumsMode[mode]);
             } catch (Exception e) {
                 System.err.println("Failed: SetMode");
                 System.err.println(e.toString());

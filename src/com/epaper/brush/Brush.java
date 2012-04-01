@@ -2,7 +2,7 @@ package com.epaper.brush;
 
 import android.graphics.Path;
 
-public class Brush implements IBrush
+public abstract class Brush implements IBrush
 {
     protected static float EPS = 1E-6f;
 
