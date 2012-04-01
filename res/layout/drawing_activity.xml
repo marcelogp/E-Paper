@@ -38,7 +38,7 @@
             android:background="@drawable/eject"
             android:onClick="onClick"
             android:id="@+id/loadBtn"
-            android:layout_marginRight="35dip"
+            android:layout_marginRight="25dip"
         />        
         <Button
             android:layout_height="wrap_content"
@@ -64,33 +64,42 @@
             android:id="@+id/prevBtn"
             android:layout_marginRight="5dip"
         />
+        <include layout="@layout/page_nums"  />
         <Button
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:background="@drawable/right"
             android:onClick="onClick"
             android:id="@+id/nextBtn"
-            android:layout_marginRight="30dip"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="20dip"
         />
-        <Button
+        
+        <ToggleButton
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:background="@drawable/small"
+            android:textOff=""
+            android:textOn=""
+            android:background="@drawable/button_small"
             android:onClick="onClick"
             android:id="@+id/smallBtn"
         />
-        <Button
+        <ToggleButton
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:background="@drawable/large"
+            android:textOff=""
+            android:textOn=""
+            android:background="@drawable/button_large"
             android:onClick="onClick"
             android:id="@+id/largeBtn"
             android:layout_marginRight="5dip"
         />
-        <Button
+        <ToggleButton
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:background="@drawable/erase"
+            android:textOff=""
+            android:textOn=""
+            android:background="@drawable/button_erase"
             android:onClick="onClick"
             android:id="@+id/eraserBtn"
             android:layout_marginRight="5dip"

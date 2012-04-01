@@ -15,6 +15,8 @@ import android.os.Message;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.ToggleButton;
 import com.epaper.brush.Brush;
 import com.epaper.brush.PenBrush;
 
@@ -34,6 +36,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
         setContentView(R.layout.drawing_activity);
 
         setCurrentPaint(3);
+        setSelectedTool(R.id.smallBtn);
         currentBrush = new PenBrush();
 
         drawingSurface = (DrawingSurface) findViewById(R.id.drawingSurface);
@@ -116,15 +119,18 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
                 new ExportBitmapToFile(this, saveHandler, drawingSurface.getBitmap()).execute();
                 break;
             case R.id.smallBtn:
+                setSelectedTool(R.id.smallBtn);
                 setCurrentPaint(3);
                 toolEraser = false;
                 break;
             case R.id.largeBtn:
+                setSelectedTool(R.id.largeBtn);
                 setCurrentPaint(8);
                 toolEraser = false;
                 break;
             case R.id.eraserBtn:
-                toolEraser = !toolEraser;
+                setSelectedTool(R.id.eraserBtn);
+                toolEraser = true;
                 break;
             case R.id.remPageBtn:
                 drawingSurface.removePage();
@@ -139,6 +145,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
                 drawingSurface.switchNextPage();
                 break;
         }
+        updatePageNumbers();
     }
 
     public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -161,7 +168,23 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
             default:
                 return false;
         }
+        updatePageNumbers();
         return true;
+    }
+
+    private void updatePageNumbers() {
+        String cp = String.valueOf(drawingSurface.getCurPage());
+        String lp = String.valueOf(drawingSurface.getLastPage());
+        
+        ((TextView) findViewById(R.id.curPage)).setText(cp);
+        ((TextView) findViewById(R.id.lastPage)).setText(lp);
+    }
+
+    private void setSelectedTool(int sel) {
+        ((ToggleButton) findViewById(R.id.smallBtn)).setChecked(false);
+        ((ToggleButton) findViewById(R.id.largeBtn)).setChecked(false);
+        ((ToggleButton) findViewById(R.id.eraserBtn)).setChecked(false);
+        ((ToggleButton) findViewById(sel)).setChecked(true);
     }
 
     private class ExportBitmapToFile extends AsyncTask<Intent, Void, Boolean>

@@ -5,6 +5,7 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.TextView;
 import com.epaper.command.Command;
 import com.epaper.command.CommandManager;
 import com.epaper.command.DrawCommand;
@@ -32,7 +33,9 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
 
         commandManagerL = new ArrayList<CommandManager>();
         curCM = 0;
-        insertPage();
+        commandManagerL.add(new CommandManager());
+        cacheIsDirty = true;
+        isDrawing = true;
 
         thread = new DrawThread(getHolder());
         bitmapCache = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
@@ -58,31 +61,39 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     }
 
     /*
-     * Called when any full page update is performed
+     * Called after any full page update is performed
      */
-    private void preparePageUpdate() {
+    private void afterPageUpdate() {
         setNormalMode();
         cacheIsDirty = true;
         isDrawing = true;
     }
+    
+    public int getCurPage() {
+        return curCM+1;
+    }
+    
+    public int getLastPage() {
+        return commandManagerL.size();
+    }
 
     public final void removePage() {
-        preparePageUpdate();
         commandManagerL.remove(curCM);
 
         if (commandManagerL.isEmpty())
             commandManagerL.add(new CommandManager());
         else if (curCM > 0)
             curCM--;
+        
+        afterPageUpdate();
     }
 
     public final void insertPage() {
-        preparePageUpdate();
         commandManagerL.add(curCM, new CommandManager());
+        afterPageUpdate();
     }
 
     public final void switchNextPage() {
-        preparePageUpdate();
         if (curCM == commandManagerL.size() - 1) {
             /*
              * Current page is already blank? Do nothing.
@@ -93,13 +104,14 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
             commandManagerL.add(new CommandManager());
         }
         curCM++;
+        afterPageUpdate();
     }
 
     public final void switchPrevPage() {
-        preparePageUpdate();
         if (curCM <= 0)
             return;
         curCM--;
+        afterPageUpdate();
     }
 
     private void setA2Mode() {

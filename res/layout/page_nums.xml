@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="25dip"
+                android:layout_height="wrap_content"
+>
+    <TextView android:id="@+id/curPage"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:textColor="#000000"
+              android:text="1"/>
+    <TextView android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:textColor="#000000"
+              android:text="of"/>
+    <TextView android:id="@+id/lastPage"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:textColor="#000000"
+              android:text="1"/>
+</LinearLayout>
+    
+    
