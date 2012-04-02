@@ -4,30 +4,45 @@
  */
 package com.epaper;
 
-import android.app.AlertDialog;
 import android.graphics.Bitmap;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import android.graphics.BitmapFactory;
+import java.io.*;
 import java.util.ArrayList;
 
 class FileManager
 {
-    public static void savePages(String path, ArrayList<Bitmap> exportBitmaps) throws IOException {
+    public static void savePages(String path, ArrayList<Bitmap> pages) throws IOException {
         File dest = new File(path);
-        System.err.println("DEST IS "+path);
 
         if (!dest.exists())
             dest.mkdirs();
 
-        for (int i = 0; i < exportBitmaps.size(); i++) {
-            String fileName = String.format("%03d.png", i);
-
-            final FileOutputStream out = new FileOutputStream(path + "/" + fileName);
-            System.err.println("Writing "+fileName+": Bitmap "+ exportBitmaps.get(i).getWidth()+"x"+exportBitmaps.get(i).getHeight());
-            exportBitmaps.get(i).compress(Bitmap.CompressFormat.PNG, 90, out);
+        for (int i = 0; i < pages.size(); i++) {
+            final FileOutputStream out = new FileOutputStream(getFilePath(path, i));
+            pages.get(i).compress(Bitmap.CompressFormat.PNG, 90, out);
             out.flush();
             out.close();
         }
+    }
+
+    public static ArrayList<Bitmap> loadPages(String path) throws IOException {
+        ArrayList<Bitmap> res = new ArrayList<Bitmap>();
+        
+        for (int i = 0;; i++) {
+            FileInputStream inp;
+            try {
+                inp = new FileInputStream(getFilePath(path, i));
+            } catch (FileNotFoundException e) {
+                break;
+            }
+            
+            res.add(BitmapFactory.decodeStream(inp));
+            inp.close();
+        }
+        return res;
+    }
+
+    private static String getFilePath(String path, int index) {
+        return path + "/" + String.format("%03d.png", index);
     }
 }

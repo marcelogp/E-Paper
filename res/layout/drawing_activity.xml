@@ -18,7 +18,7 @@
         <Button
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:background="@drawable/file"
+            android:background="@drawable/newfile"
             android:onClick="onClick"
             android:id="@+id/newBtn"
             android:layout_marginLeft="5dip"
@@ -38,7 +38,7 @@
             android:background="@drawable/eject"
             android:onClick="onClick"
             android:id="@+id/loadBtn"
-            android:layout_marginRight="25dip"
+            android:layout_marginRight="5dip"
         />        
         <Button
             android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
             android:background="@drawable/rempage"
             android:onClick="onClick"
             android:id="@+id/remPageBtn"
-            android:layout_marginRight="10dip"
+            android:layout_marginRight="5dip"
         />
         <Button
             android:layout_height="wrap_content"
@@ -62,6 +62,7 @@
             android:background="@drawable/left"
             android:onClick="onClick"
             android:id="@+id/prevBtn"
+            android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
         />
         <include layout="@layout/page_nums"  />
@@ -72,7 +73,24 @@
             android:onClick="onClick"
             android:id="@+id/nextBtn"
             android:layout_marginLeft="5dip"
-            android:layout_marginRight="20dip"
+            android:layout_marginRight="10dip"
+        />
+        
+        <Button
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:background="@drawable/undo"
+            android:onClick="onClick"
+            android:id="@+id/undoBtn"
+            android:layout_marginRight="5dip"
+        />
+        <Button
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:background="@drawable/redo"
+            android:onClick="onClick"
+            android:id="@+id/redoBtn"
+            android:layout_marginRight="5dip"
         />
         
         <ToggleButton

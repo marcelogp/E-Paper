@@ -13,11 +13,17 @@ public class CommandManager
     private List<DrawingPath> currentStack;
     private List<Command> redoStack;
     private List<Command> undoStack;
+    private Bitmap background;
 
     public CommandManager() {
         currentStack = Collections.synchronizedList(new ArrayList<DrawingPath>());
         redoStack = Collections.synchronizedList(new ArrayList<Command>());
         undoStack = Collections.synchronizedList(new ArrayList<Command>());
+    }
+    
+    public CommandManager(Bitmap bg) {
+        this();
+        background = bg;
     }
 
     public void addCommand(Command command) {
@@ -61,6 +67,10 @@ public class CommandManager
 
     public void drawAll(Bitmap drawTo) {
         Canvas c = new Canvas(drawTo);
+        
+        if (background != null)
+            c.drawBitmap(background, 0, 0, null);
+        
         if (currentStack != null) {
             synchronized (currentStack) {
                 final Iterator i = currentStack.iterator();
@@ -97,7 +107,7 @@ public class CommandManager
                     Paint iPaint = new Paint(drawingPath.paint);
                     iPaint.setColor(0xFF000000 | i);
                     iPaint.setStrokeWidth(iPaint.getStrokeWidth() + STROKE_DIST);
-                    ctmp.drawPath(drawingPath.getPath(), iPaint);
+                    ctmp.drawPath(drawingPath.path, iPaint);
                 }
 
                 return removePath(x, y, bitmapTmp);
@@ -119,6 +129,6 @@ public class CommandManager
     }
     
     public boolean isEmpty() {
-        return currentStack.isEmpty();
+        return currentStack.isEmpty() && background == null;
     }
 }

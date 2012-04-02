@@ -3,9 +3,11 @@ package com.epaper;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -15,16 +17,21 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 import com.epaper.brush.Brush;
 import com.epaper.brush.PenBrush;
+import com.epaper.kaloer.filepicker.FilePickerActivity;
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class DrawingActivity extends Activity implements View.OnTouchListener, View.OnKeyListener
 {
+    private static final int REQUEST_PICK_DIR = 1;
     private DrawingSurface drawingSurface;
     private Paint currentPaint;
     private Brush currentBrush;
     private Boolean toolEraser;
+    private String defaultDir;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +46,8 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
         drawingSurface.setOnKeyListener(this);
 
         toolEraser = false;
+        
+        defaultDir = Environment.getExternalStorageDirectory() + "/E-Paper";
 
         drawingSurface.start(); // ensures that first drawing will respond quickly
     }
@@ -106,12 +115,12 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
                 }).show();
 
                 break;
-//            case R.id.undoBtn:
-//                drawingSurface.undo();
-//                break;
-//            case R.id.redoBtn:
-//                drawingSurface.redo();
-//                break;
+            case R.id.undoBtn:
+                drawingSurface.undo();
+                break;
+            case R.id.redoBtn:
+                drawingSurface.redo();
+                break;
             case R.id.saveBtn:
                 N2EpdController.setNormalMode();
                 final EditText input = new EditText(this);
@@ -133,6 +142,18 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
                     public void onClick(DialogInterface dialog, int whichButton) {
                     }
                 }).show();
+
+                break;
+            case R.id.loadBtn:
+                N2EpdController.setNormalMode();
+
+                Intent intent = new Intent(this, FilePickerActivity.class);
+                // Don't show any files, just directories
+                intent.putExtra(FilePickerActivity.EXTRA_ACCEPTED_FILE_EXTENSIONS,
+                                new ArrayList<String>());
+
+                intent.putExtra(FilePickerActivity.EXTRA_FILE_PATH, defaultDir);
+                startActivityForResult(intent, REQUEST_PICK_DIR);
 
                 break;
             case R.id.smallBtn:
@@ -206,13 +227,36 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
 
     private void savePages(String path) {
         try {
-            FileManager.savePages(path, drawingSurface.exportBitmaps());
+            FileManager.savePages(path, drawingSurface.exportPages());
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Save failed. Make sure directory is writable");
             return;
         }
         showAlert("Save Successful");
+    }
+
+    private void loadPages(String path) {
+        try {
+            drawingSurface.importPages(FileManager.loadPages(path));
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Load failed. Corrupt file?");
+            return;
+        }
+        updatePageNumbers();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case REQUEST_PICK_DIR:
+                    if (data.hasExtra(FilePickerActivity.EXTRA_FILE_PATH)) {
+                        loadPages(data.getStringExtra(FilePickerActivity.EXTRA_FILE_PATH));
+                    }
+            }
+        }
     }
 
     private void showAlert(String message) {
@@ -224,9 +268,9 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
             }
         }).show();
     }
-    
+
     private String getDefaultDir() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH.mm");
-        return "/sdcard/E-Paper/" + sdf.format(new Date(System.currentTimeMillis()));
+        return defaultDir + "/" + sdf.format(new Date(System.currentTimeMillis()));
     }
 }

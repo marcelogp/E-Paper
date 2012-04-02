@@ -33,7 +33,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         commandManagerL = new ArrayList<CommandManager>();
         commandManagerL.add(new CommandManager());
         curCM = 0;
-        
+
         cacheIsDirty = true;
         isDrawing = true;
 
@@ -60,19 +60,17 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         }
     }
 
-    /*
-     * Called after any full page update is performed
-     */
+    // Called after any full page update is performed
     private void afterPageUpdate() {
         N2EpdController.setNormalMode();
         cacheIsDirty = true;
         isDrawing = true;
     }
-    
+
     public int getCurPage() {
-        return curCM+1;
+        return curCM + 1;
     }
-    
+
     public int getLastPage() {
         return commandManagerL.size();
     }
@@ -84,7 +82,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
             commandManagerL.add(new CommandManager());
         else if (curCM == commandManagerL.size())
             curCM--;
-        
+
         afterPageUpdate();
     }
 
@@ -95,9 +93,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
 
     public final void switchNextPage() {
         if (curCM == commandManagerL.size() - 1) {
-            /*
-             * Last page is already blank? Do nothing.
-             */
+            // Last page is already blank? Do nothing.
             if (commandManagerL.get(curCM).isEmpty())
                 return;
 
@@ -110,12 +106,12 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     public final void switchPrevPage() {
         if (curCM <= 0)
             return;
-        
+
         if (curCM == commandManagerL.size() - 1 && commandManagerL.get(curCM).isEmpty()) {
-            removePage();    
+            removePage();
             return;
         }
-        
+
         curCM--;
         afterPageUpdate();
     }
@@ -124,7 +120,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         commandManagerL = new ArrayList<CommandManager>();
         commandManagerL.add(new CommandManager());
         curCM = 0;
-        
+
         afterPageUpdate();
     }
 
@@ -173,18 +169,29 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
             }
         }
     }
-    
-    public ArrayList<Bitmap> exportBitmaps() {
+
+    public ArrayList<Bitmap> exportPages() {
         ArrayList<Bitmap> ans = new ArrayList<Bitmap>();
-        
+
         for (CommandManager cm : commandManagerL) {
-            if (cm.isEmpty()) continue;
-            
+            if (cm.isEmpty())
+                continue;
+
             Bitmap bmp = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
             cm.drawAll(bmp);
             ans.add(bmp);
         }
         return ans;
+    }
+
+    public void importPages(ArrayList<Bitmap> data) {
+        commandManagerL = new ArrayList<CommandManager>();
+        curCM = 0;
+
+        for (Bitmap bmp : data) {
+            commandManagerL.add(new CommandManager(bmp));
+        }
+        afterPageUpdate();
     }
 
     public boolean hasMoreRedo() {
