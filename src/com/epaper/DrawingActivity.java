@@ -2,26 +2,22 @@ package com.epaper;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import com.epaper.brush.Brush;
 import com.epaper.brush.PenBrush;
-
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DrawingActivity extends Activity implements View.OnTouchListener, View.OnKeyListener
 {
@@ -29,7 +25,6 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
     private Paint currentPaint;
     private Brush currentBrush;
     private Boolean toolEraser;
-    private File APP_FILE_PATH = new File("/sdcard/AndroidDrawings");
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +87,25 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
 
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.newBtn:
+                N2EpdController.setNormalMode();
+
+                new AlertDialog.Builder(this) // 
+                        .setTitle("Confirmation") //
+                        .setMessage("Discard unsaved changes?") //
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int which) {
+                        drawingSurface.removeAllPages();
+                        updatePageNumbers();
+                    }
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).show();
+
+                break;
 //            case R.id.undoBtn:
 //                drawingSurface.undo();
 //                break;
@@ -99,24 +113,27 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
 //                drawingSurface.redo();
 //                break;
             case R.id.saveBtn:
-                final Activity currentActivity = this;
-                Handler saveHandler = new Handler()
+                N2EpdController.setNormalMode();
+                final EditText input = new EditText(this);
+                input.setText(getDefaultDir());
+
+                new AlertDialog.Builder(this) // 
+                        .setTitle("Destination") //
+                        .setMessage("Path to save") //
+                        .setView(input) //
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener()
                 {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        final AlertDialog alertDialog = new AlertDialog.Builder(currentActivity).create();
-                        alertDialog.setTitle("Saved");
-                        alertDialog.setMessage("Your drawing had been saved");
-                        alertDialog.setButton("OK", new DialogInterface.OnClickListener()
-                        {
-                            public void onClick(DialogInterface dialog, int which) {
-                                return;
-                            }
-                        });
-                        alertDialog.show();
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Editable path = input.getText();
+
+                        savePages(path.toString());
                     }
-                };
-                new ExportBitmapToFile(this, saveHandler, drawingSurface.getBitmap()).execute();
+                }).setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    }
+                }).show();
+
                 break;
             case R.id.smallBtn:
                 setSelectedTool(R.id.smallBtn);
@@ -175,7 +192,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
     private void updatePageNumbers() {
         String cp = String.valueOf(drawingSurface.getCurPage());
         String lp = String.valueOf(drawingSurface.getLastPage());
-        
+
         ((TextView) findViewById(R.id.curPage)).setText(cp);
         ((TextView) findViewById(R.id.lastPage)).setText(lp);
     }
@@ -187,42 +204,29 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
         ((ToggleButton) findViewById(sel)).setChecked(true);
     }
 
-    private class ExportBitmapToFile extends AsyncTask<Intent, Void, Boolean>
-    {
-        private Context mContext;
-        private Handler mHandler;
-        private Bitmap nBitmap;
-
-        public ExportBitmapToFile(Context context, Handler handler, Bitmap bitmap) {
-            mContext = context;
-            nBitmap = bitmap;
-            mHandler = handler;
+    private void savePages(String path) {
+        try {
+            FileManager.savePages(path, drawingSurface.exportBitmaps());
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Save failed. Make sure directory is writable");
+            return;
         }
+        showAlert("Save Successful");
+    }
 
-        @Override
-        protected Boolean doInBackground(Intent... arg0) {
-            try {
-                if (!APP_FILE_PATH.exists()) {
-                    APP_FILE_PATH.mkdirs();
-                }
-
-                final FileOutputStream out = new FileOutputStream(new File(APP_FILE_PATH + "/myAwesomeDrawing.png"));
-                nBitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
-                out.flush();
-                out.close();
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
+    private void showAlert(String message) {
+        new AlertDialog.Builder(this) // 
+                .setMessage(message) //
+                .setPositiveButton("OK", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int whichButton) {
             }
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean bool) {
-            super.onPostExecute(bool);
-            if (bool) {
-                mHandler.sendEmptyMessage(1);
-            }
-        }
+        }).show();
+    }
+    
+    private String getDefaultDir() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH.mm");
+        return "/sdcard/E-Paper/" + sdf.format(new Date(System.currentTimeMillis()));
     }
 }

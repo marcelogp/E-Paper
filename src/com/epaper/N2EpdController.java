@@ -81,4 +81,16 @@ public class N2EpdController
             }
         }
     }
+    
+    public static void setA2Mode() {
+        N2EpdController.setMode(N2EpdController.REGION_APP_3,
+                                N2EpdController.WAVE_A2,
+                                N2EpdController.MODE_ACTIVE_ALL);
+    }
+
+    public static void setNormalMode() {
+        N2EpdController.setMode(N2EpdController.REGION_APP_3,
+                                N2EpdController.WAVE_GU,
+                                N2EpdController.MODE_ACTIVE);
+    }
 }

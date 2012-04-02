@@ -5,7 +5,6 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.TextView;
 import com.epaper.command.Command;
 import com.epaper.command.CommandManager;
 import com.epaper.command.DrawCommand;
@@ -32,8 +31,9 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         setBackgroundColor(Color.WHITE);
 
         commandManagerL = new ArrayList<CommandManager>();
-        curCM = 0;
         commandManagerL.add(new CommandManager());
+        curCM = 0;
+        
         cacheIsDirty = true;
         isDrawing = true;
 
@@ -64,7 +64,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
      * Called after any full page update is performed
      */
     private void afterPageUpdate() {
-        setNormalMode();
+        N2EpdController.setNormalMode();
         cacheIsDirty = true;
         isDrawing = true;
     }
@@ -82,7 +82,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
 
         if (commandManagerL.isEmpty())
             commandManagerL.add(new CommandManager());
-        else if (curCM > 0)
+        else if (curCM == commandManagerL.size())
             curCM--;
         
         afterPageUpdate();
@@ -96,7 +96,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     public final void switchNextPage() {
         if (curCM == commandManagerL.size() - 1) {
             /*
-             * Current page is already blank? Do nothing.
+             * Last page is already blank? Do nothing.
              */
             if (commandManagerL.get(curCM).isEmpty())
                 return;
@@ -110,20 +110,22 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
     public final void switchPrevPage() {
         if (curCM <= 0)
             return;
+        
+        if (curCM == commandManagerL.size() - 1 && commandManagerL.get(curCM).isEmpty()) {
+            removePage();    
+            return;
+        }
+        
         curCM--;
         afterPageUpdate();
     }
 
-    private void setA2Mode() {
-        N2EpdController.setMode(N2EpdController.REGION_APP_3,
-                                N2EpdController.WAVE_A2,
-                                N2EpdController.MODE_ACTIVE_ALL);
-    }
-
-    private void setNormalMode() {
-        N2EpdController.setMode(N2EpdController.REGION_APP_3,
-                                N2EpdController.WAVE_GC,
-                                N2EpdController.MODE_ACTIVE);
+    void removeAllPages() {
+        commandManagerL = new ArrayList<CommandManager>();
+        commandManagerL.add(new CommandManager());
+        curCM = 0;
+        
+        afterPageUpdate();
     }
 
     class DrawThread extends Thread
@@ -171,6 +173,19 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
             }
         }
     }
+    
+    public ArrayList<Bitmap> exportBitmaps() {
+        ArrayList<Bitmap> ans = new ArrayList<Bitmap>();
+        
+        for (CommandManager cm : commandManagerL) {
+            if (cm.isEmpty()) continue;
+            
+            Bitmap bmp = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+            cm.drawAll(bmp);
+            ans.add(bmp);
+        }
+        return ans;
+    }
 
     public boolean hasMoreRedo() {
         return commandManagerL.get(curCM).hasMoreRedo();
@@ -204,7 +219,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
 
     public void start() {
         isDrawing = true;
-        setA2Mode();
+        N2EpdController.setA2Mode();
     }
 
     public void end() {
