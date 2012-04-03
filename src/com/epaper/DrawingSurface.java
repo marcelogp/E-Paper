@@ -38,11 +38,11 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         isDrawing = true;
 
         thread = new DrawThread(getHolder());
-        bitmapCache = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        bitmapCache = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
     }
 
     private void resetBitmapCache() {
-        bitmapCache = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+        bitmapCache = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ALPHA_8);
     }
 
     void attemptErase(float x, float y) {
@@ -144,7 +144,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
                     try {
                         canvas = mSurfaceHolder.lockCanvas(null);
                         if (mBitmap == null) {
-                            mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                            mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
                         }
 
                         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
@@ -177,7 +177,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
             if (cm.isEmpty())
                 continue;
 
-            Bitmap bmp = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+            Bitmap bmp = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_4444);
             cm.drawAll(bmp);
             ans.add(bmp);
         }
@@ -238,7 +238,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         // TODO Auto-generated method stub
-        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8);
         isDrawing = true;
     }
 

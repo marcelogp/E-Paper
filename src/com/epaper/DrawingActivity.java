@@ -2,12 +2,15 @@ package com.epaper;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -18,7 +21,6 @@ import android.widget.ToggleButton;
 import com.epaper.brush.Brush;
 import com.epaper.brush.PenBrush;
 import com.epaper.kaloer.filepicker.FilePickerActivity;
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,17 +29,20 @@ import java.util.Date;
 public class DrawingActivity extends Activity implements View.OnTouchListener, View.OnKeyListener
 {
     private static final int REQUEST_PICK_DIR = 1;
+    private static final int PAINT_SIZE_SMALL = 3;
+    private static final int PAINT_SIZE_LARGE = 8;
     private DrawingSurface drawingSurface;
     private Paint currentPaint;
     private Brush currentBrush;
     private Boolean toolEraser;
     private String defaultDir;
+    private ProgressDialog saveProgress;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawing_activity);
 
-        setCurrentPaint(3);
+        setCurrentPaint(PAINT_SIZE_SMALL);
         setSelectedTool(R.id.smallBtn);
         currentBrush = new PenBrush();
 
@@ -46,7 +51,7 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
         drawingSurface.setOnKeyListener(this);
 
         toolEraser = false;
-        
+
         defaultDir = Environment.getExternalStorageDirectory() + "/E-Paper";
 
         drawingSurface.start(); // ensures that first drawing will respond quickly
@@ -158,12 +163,12 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
                 break;
             case R.id.smallBtn:
                 setSelectedTool(R.id.smallBtn);
-                setCurrentPaint(3);
+                setCurrentPaint(PAINT_SIZE_SMALL);
                 toolEraser = false;
                 break;
             case R.id.largeBtn:
                 setSelectedTool(R.id.largeBtn);
-                setCurrentPaint(8);
+                setCurrentPaint(PAINT_SIZE_LARGE);
                 toolEraser = false;
                 break;
             case R.id.eraserBtn:
@@ -226,19 +231,53 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
     }
 
     private void savePages(String path) {
-        try {
-            FileManager.savePages(path, drawingSurface.exportPages());
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Save failed. Make sure directory is writable");
-            return;
-        }
-        showAlert("Save Successful");
+        saveProgress = new ProgressDialog(this);
+        saveProgress.setIndeterminate(false);
+        saveProgress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        saveProgress.setTitle("Saving...");
+        saveProgress.show();
+
+        Thread t = new SaveThread(path);
+        t.start();
     }
+
+    class SaveThread extends Thread
+    {
+        String path;
+
+        public SaveThread(String path) {
+            this.path = path;
+        }
+
+        @Override
+        public void run() {
+            try {
+                FileManager.savePages(path, drawingSurface.exportPages(), saveProgress);
+            } catch (IOException e) {
+                e.printStackTrace();
+                saveHandler.sendEmptyMessage(1);
+                return;
+            }
+            saveHandler.sendEmptyMessage(0);
+        }
+    }
+    private Handler saveHandler = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what != 0)
+                showAlert("Save failed. Make sure directory is writable");
+             
+            saveProgress.dismiss();
+        }
+    };
 
     private void loadPages(String path) {
         try {
-            drawingSurface.importPages(FileManager.loadPages(path));
+            int w = drawingSurface.getWidth();
+            int h = drawingSurface.getHeight();
+            
+            drawingSurface.importPages(FileManager.loadPages(path,w,h));
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Load failed. Corrupt file?");

@@ -21,7 +21,7 @@
             android:background="@drawable/newfile"
             android:onClick="onClick"
             android:id="@+id/newBtn"
-            android:layout_marginLeft="5dip"
+            android:layout_marginLeft="10dip"
             android:layout_marginRight="5dip"
         />
         <Button
