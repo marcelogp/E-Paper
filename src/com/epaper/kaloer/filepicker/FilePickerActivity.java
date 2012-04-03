@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.epaper.kaloer.filepicker;
 
 import java.io.File;
@@ -54,6 +55,10 @@ public class FilePickerActivity extends ListActivity
      * with the intent
      */
     private final static String DEFAULT_INITIAL_DIRECTORY = "/";
+    
+    /* Marks a special directory which should be picked */
+    private final static String MARKER_FILENAME = "000.png";
+    
     protected File mDirectory;
     protected ArrayList<File> mFiles;
     protected FilePickerListAdapter mAdapter;
@@ -163,7 +168,7 @@ public class FilePickerActivity extends ListActivity
     }
 
     private boolean isSpecialDir(File newFile) {
-        File test = new File(newFile, "000.png");
+        File test = new File(newFile, MARKER_FILENAME);
         return test.exists();
     }
 
