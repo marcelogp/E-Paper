@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package com.epaper;
 
 import android.content.Context;
@@ -55,11 +54,11 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         isDrawing = true;
 
         thread = new DrawThread(getHolder());
-        bitmapCache = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
+        bitmapCache = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444);
     }
 
     private void resetBitmapCache() {
-        bitmapCache = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ALPHA_8);
+        bitmapCache = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_4444);
     }
 
     void attemptErase(float x, float y) {
@@ -161,16 +160,17 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
                     try {
                         canvas = mSurfaceHolder.lockCanvas(null);
                         if (mBitmap == null) {
-                            mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8);
+                            mBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444);
                         }
 
                         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-
+                        DrawingPath drawPath = null;
+                        
                         if (currentDrawingPath != null)
-                            currentDrawingPath.draw(canvas);
+                            drawPath = currentDrawingPath;
                         else
                             isDrawing = false;
-
+                        
                         if (cacheIsDirty) {
                             resetBitmapCache();
                             commandManagerL.get(curCM).drawAll(bitmapCache);
@@ -178,6 +178,9 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
                         }
                         canvas.drawBitmap(bitmapCache, 0, 0, null);
 
+                        if (drawPath != null)
+                            drawPath.draw(canvas);
+                        
                         canvas.drawBitmap(mBitmap, 0, 0, null);
                     } finally {
                         mSurfaceHolder.unlockCanvasAndPost(canvas);
@@ -205,9 +208,13 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
         commandManagerL = new ArrayList<CommandManager>();
         curCM = 0;
 
-        for (Bitmap bmp : data) {
-            commandManagerL.add(new CommandManager(bmp));
-        }
+        for (Bitmap bmp : data)
+            if (bmp != null)
+                commandManagerL.add(new CommandManager(bmp));
+
+        if (commandManagerL.isEmpty())
+            commandManagerL.add(new CommandManager());
+
         afterPageUpdate();
     }
 
@@ -255,7 +262,7 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
 
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         // TODO Auto-generated method stub
-        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ALPHA_8);
+        mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_4444);
         isDrawing = true;
     }
 

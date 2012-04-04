@@ -23,13 +23,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 >
     <com.epaper.DrawingSurface
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="758px"
         android:id="@+id/drawingSurface"
     />
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="42px"
         android:orientation="horizontal"
+        android:background="#FFFFFF"
         android:layout_alignParentBottom="true"
     >
         <Button
@@ -38,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             android:background="@drawable/newfile"
             android:onClick="onClick"
             android:id="@+id/newBtn"
-            android:layout_marginLeft="10dip"
+            android:layout_marginLeft="5dip"
             android:layout_marginRight="5dip"
         />
         <Button

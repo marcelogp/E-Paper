@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.epaper.kaloer.filepicker;
 
 import java.io.File;
@@ -30,10 +29,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import com.epaper.R;
 
 public class FilePickerActivity extends ListActivity
@@ -55,10 +51,10 @@ public class FilePickerActivity extends ListActivity
      * with the intent
      */
     private final static String DEFAULT_INITIAL_DIRECTORY = "/";
-    
-    /* Marks a special directory which should be picked */
+    /*
+     * Marks a special directory which should be picked
+     */
     private final static String MARKER_FILENAME = "000.png";
-    
     protected File mDirectory;
     protected ArrayList<File> mFiles;
     protected FilePickerListAdapter mAdapter;
@@ -99,6 +95,17 @@ public class FilePickerActivity extends ListActivity
             ArrayList<String> collection = getIntent().getStringArrayListExtra(EXTRA_ACCEPTED_FILE_EXTENSIONS);
             acceptedFileExtensions = (String[]) collection.toArray(new String[collection.size()]);
         }
+
+        ListView lv = getListView();
+
+        lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener()
+        {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+                onLongListItemClick(v, pos, id);
+                return false;
+            }
+        });
     }
 
     @Override
@@ -165,6 +172,15 @@ public class FilePickerActivity extends ListActivity
         }
 
         super.onListItemClick(l, v, position, id);
+    }
+
+    protected void onLongListItemClick(View v, int pos, long id) {
+        File newFile = (File) getListView().getItemAtPosition(pos);
+
+        Intent extra = new Intent();
+        extra.putExtra(EXTRA_FILE_PATH, newFile.getAbsolutePath());
+        setResult(RESULT_OK, extra);
+        finish();
     }
 
     private boolean isSpecialDir(File newFile) {

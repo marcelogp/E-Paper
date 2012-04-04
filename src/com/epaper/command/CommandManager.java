@@ -87,7 +87,7 @@ public class CommandManager
         
         if (background != null)
             c.drawBitmap(background, 0, 0, null);
-        
+
         if (currentStack != null) {
             synchronized (currentStack) {
                 final Iterator i = currentStack.iterator();

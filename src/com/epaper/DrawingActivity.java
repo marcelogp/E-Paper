@@ -170,9 +170,10 @@ public class DrawingActivity extends Activity implements View.OnTouchListener, V
                 N2EpdController.setNormalMode();
 
                 Intent intent = new Intent(this, FilePickerActivity.class);
-                // Don't show any files, just directories
-                intent.putExtra(FilePickerActivity.EXTRA_ACCEPTED_FILE_EXTENSIONS,
-                                new ArrayList<String>());
+                ArrayList<String> fileTypes = new ArrayList<String>();
+                fileTypes.add(".png");
+                
+                intent.putExtra(FilePickerActivity.EXTRA_ACCEPTED_FILE_EXTENSIONS, fileTypes);
 
                 intent.putExtra(FilePickerActivity.EXTRA_FILE_PATH, defaultDir);
                 startActivityForResult(intent, REQUEST_PICK_DIR);
