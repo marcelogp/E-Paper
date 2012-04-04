@@ -198,6 +198,8 @@ public class DrawingSurface extends SurfaceView implements SurfaceHolder.Callbac
                 continue;
 
             Bitmap bmp = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_4444);
+            bmp.eraseColor(0xFFFFFFFF);
+            
             cm.drawAll(bmp);
             ans.add(bmp);
         }
